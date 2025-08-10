@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -19,6 +17,8 @@ import { useTranslations } from 'next-intl';
 type ForgotPasswordFormInputs = {
   email: string;
 };
+
+export const dynamic = 'force-dynamic';
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
