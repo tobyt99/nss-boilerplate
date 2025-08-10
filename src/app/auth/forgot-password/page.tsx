@@ -20,6 +20,15 @@ type ForgotPasswordFormInputs = {
 
 export const dynamic = 'force-dynamic';
 
+// Safely resolve the app origin without using `new URL`.
+// Works in the browser and in Vercel (when NEXT_PUBLIC_APP_URL is set).
+function getAppOrigin(): string {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL || '';
+}
+
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,8 +44,16 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (input: ForgotPasswordFormInputs) => {
     setIsLoading(true);
     try {
+      const origin = getAppOrigin();
+      // If we don't have an origin, fail early with a friendly error (prevents "Invalid URL")
+      if (!origin) {
+        throw new Error('App URL is not configured. Set NEXT_PUBLIC_APP_URL in your env.');
+      }
+
+      const redirectTo = `${origin}/change-password`;
+
       const { error } = await supabaseClient.auth.resetPasswordForEmail(input.email, {
-        redirectTo: new URL('/change-password', window.location.origin).toString(),
+        redirectTo,
       });
 
       if (error) throw error;
